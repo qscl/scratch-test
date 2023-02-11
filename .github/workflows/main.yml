@@ -54,17 +54,11 @@ jobs:
       RA_TARGET: ${{ matrix.target }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: ${{ env.FETCH_DEPTH }}
-          submodules: true
-
       - name: Install toolchain dependencies
         if: matrix.container == 'ubuntu:18.04'
         shell: bash
         run: |
-          apt-get update && apt-get install -y build-essential curl
+          apt-get update && apt-get install -y build-essential curl git
           curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused -fsSL "https://sh.rustup.rs" | sh -s -- --profile minimal --default-toolchain none -y
           echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> $GITHUB_PATH
       - name: Install Rust toolchain
@@ -88,6 +82,12 @@ jobs:
       - name: Install ARM target toolchain
         if: matrix.target == 'arm-unknown-linux-gnueabihf'
         run: sudo apt-get install gcc-arm-linux-gnueabihf
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: ${{ env.FETCH_DEPTH }}
+          submodules: true
 
       - name: Dist
         run: cargo build --release
