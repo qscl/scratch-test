@@ -93,6 +93,16 @@ jobs:
         with:
           key: ${{ github.job }}-${{ matrix.os }}  # Eg. "some_build-ubuntu-latest"
 
+	  - uses: actions/cache@v3
+		with:
+		  path: |
+			~/.cargo/bin/
+			~/.cargo/registry/index/
+			~/.cargo/registry/cache/
+			~/.cargo/git/db/
+			target/
+		  key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
       - name: Dist
         run: cargo build --release --no-default-features --features 'cli duckdb-bundled'
 
