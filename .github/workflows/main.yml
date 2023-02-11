@@ -88,6 +88,9 @@ jobs:
           fetch-depth: ${{ env.FETCH_DEPTH }}
           submodules: true
 
+      - name: Check version
+        run: rustc --version
+
       - name: Dist
         run: cargo build --release
 
