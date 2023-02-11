@@ -88,11 +88,13 @@ jobs:
           fetch-depth: ${{ env.FETCH_DEPTH }}
           submodules: true
 
-      - name: Check version
-        run: rustc --version
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.job }}-${{ matrix.os }}  # Eg. "some_build-ubuntu-latest"
 
       - name: Dist
-        run: cargo build --release
+        run: cargo build --release --no-default-features --features cli
 
       - run: npm ci
         working-directory: editors/code

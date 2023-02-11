@@ -28,12 +28,13 @@ path = "bin/lsp.rs"
 required-features = ["lsp"]
 
 [features]
-default = ["cli"]
+default = ["cli", "duckdb-bundled"]
 multi-thread = ["tokio/rt-multi-thread"]
 serde = ["dep:serde", "arrow-schema/serde", "half/serde"]
 ts = ["serde", "dep:ts-rs"]
 cli = ["clap", "home", "rustyline"]
 lsp = ["multi-thread", "tokio/io-util", "tokio/io-std", "tokio/macros", "tokio/fs", "regex", "serde_json", "serde", "tower-lsp"]
+duckdb-bundled = ["duckdb/bundled"]
 
 [dependencies]
 
@@ -76,7 +77,7 @@ url = "2.3.1"
 # -- ENGINES ---
 # TODO: We should put each database dependency runtime behind a feature flag
 # DuckDB.
-duckdb = { version = "0.6.1", features = ["bundled"] }
+duckdb = { version = "0.6.1" }
 # These are duckdb dependencies that we access directly
 hashlink = { version = "0.8" }
 
