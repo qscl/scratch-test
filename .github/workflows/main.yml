@@ -94,7 +94,7 @@ jobs:
           key: ${{ github.job }}-${{ matrix.os }}  # Eg. "some_build-ubuntu-latest"
 
       - name: Dist
-        run: cargo build --release --no-default-features --features cli duckdb-bundled
+        run: cargo build --release --no-default-features --features 'cli duckdb-bundled'
 
       - run: npm ci
         working-directory: editors/code
