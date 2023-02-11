@@ -1,6 +1,7 @@
 name: Release
 on:
   workflow_dispatch:
+  push:
 
 # Inspired by https://github.com/rust-lang/rust-analyzer/blob/master/.github/workflows/release.yaml
 env:
@@ -18,31 +19,31 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            code-target: win32-x64
-          - os: windows-latest
-            target: i686-pc-windows-msvc
-            code-target: win32-ia32
-          - os: windows-latest
-            target: aarch64-pc-windows-msvc
-            code-target: win32-arm64
-          - os: ubuntu-20.04
-            target: x86_64-unknown-linux-gnu
-            code-target: linux-x64
-            container: ubuntu:18.04
+#          - os: windows-latest
+#            target: x86_64-pc-windows-msvc
+#            code-target: win32-x64
+#          - os: windows-latest
+#            target: i686-pc-windows-msvc
+#            code-target: win32-ia32
+#          - os: windows-latest
+#            target: aarch64-pc-windows-msvc
+#            code-target: win32-arm64
+#          - os: ubuntu-20.04
+#            target: x86_64-unknown-linux-gnu
+#            code-target: linux-x64
+#            container: ubuntu:18.04
           - os: ubuntu-20.04
             target: aarch64-unknown-linux-gnu
             code-target: linux-arm64
-          - os: ubuntu-20.04
-            target: arm-unknown-linux-gnueabihf
-            code-target: linux-armhf
-          - os: macos-11
-            target: x86_64-apple-darwin
-            code-target: darwin-x64
-          - os: macos-11
-            target: aarch64-apple-darwin
-            code-target: darwin-arm64
+#          - os: ubuntu-20.04
+#            target: arm-unknown-linux-gnueabihf
+#            code-target: linux-armhf
+#          - os: macos-11
+#            target: x86_64-apple-darwin
+#            code-target: darwin-x64
+#          - os: macos-11
+#            target: aarch64-apple-darwin
+#            code-target: darwin-arm64
 
     name: dist (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
@@ -87,7 +88,7 @@ jobs:
         run: sudo apt-get install gcc-arm-linux-gnueabihf
 
       - name: Dist
-        run: cargo xtask dist --client-patch-version ${{ github.run_number }}
+        run: cargo build --release
 
       - run: npm ci
         working-directory: editors/code
