@@ -118,7 +118,7 @@ jobs:
             ${{ matrix.os }}-yarn-${{ hashFiles('./extension/yarn.lock', './extension/webview/yarn.lock', './extension/client/yarn.lock') }}
 
       - name: Make
-        run: make all
+        run: make all -j 3
 
       - uses: actions/cache/save@v3
         if: always()
