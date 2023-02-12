@@ -113,7 +113,7 @@ jobs:
           key: ${{ matrix.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
       - name: Make
-        run: CARGO_NET_GIT_FETCH_WITH_CLI=true cargo build --release --features cli
+        run: make qs
 
       - uses: actions/cache/save@v3
         if: always()
