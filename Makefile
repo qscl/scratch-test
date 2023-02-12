@@ -5,7 +5,7 @@ all: ${VENV_PRE_COMMIT} extension qs
 
 .PHONY: qs
 qs: submodules
-	CARGO_NET_GIT_FETCH_WITH_CLI=true cargo build ${CARGO_FLAGS} --features 'cli lsp'
+	cargo build ${CARGO_FLAGS} --features 'cli lsp'
 
 .PHONY: submodules
 submodules: sqlparser-rs/Cargo.toml
@@ -27,7 +27,7 @@ ts-bindings:
 
 .PHONY: test lfs refresh-test-data
 test: lfs submodules
-	cd queryscript/src/ && CARGO_NET_GIT_FETCH_WITH_CLI=true cargo test ${CARGO_FLAGS} -- --nocapture
+	cd queryscript/src/ && cargo test ${CARGO_FLAGS} -- --nocapture
 
 lfs:
 	git lfs install && git lfs fetch
