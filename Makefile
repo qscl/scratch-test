@@ -13,8 +13,12 @@ submodules: sqlparser-rs/Cargo.toml
 sqlparser-rs/Cargo.toml:
 	git submodule update --init --recursive
 
-.PHONY: extension lsp-rust yarn-deps ts-bindings
-extension: lsp-rust yarn-deps
+.PHONY: extension build-extension lsp-rust yarn-deps ts-bindings
+
+extension: lsp-rust build-extension
+	cd extension && npx vsce package
+
+build-extension: yarn-deps
 	cd extension && yarn esbuild
 
 lsp-rust: submodules
