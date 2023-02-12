@@ -7,6 +7,7 @@ on:
 env:
   CARGO_INCREMENTAL: 0
   CARGO_NET_RETRY: 10
+  CARGO_FLAGS: "--release"
   RUSTFLAGS: "-D warnings"
   RUSTUP_MAX_RETRIES: 10
   FETCH_DEPTH: 0 # pull in the tags for the version string
@@ -103,8 +104,16 @@ jobs:
             target/
           key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
+      - uses: actions/cache@v3
+        with:
+          path: |
+            extension/node_modules
+            extension/client/node_modules
+            extension/webview/node_modules
+          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/yarn.lock') }}
+
       - name: Dist
-        run: cargo build --release --no-default-features --features 'cli duckdb-bundled'
+        run: make
 
       - uses: actions/cache/save@v3
         if: always()
@@ -117,6 +126,14 @@ jobs:
             target/
           key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
+      - uses: actions/cache/save@v3
+        if: always()
+        with:
+          path: |
+            extension/node_modules
+            extension/client/node_modules
+            extension/webview/node_modules
+          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/yarn.lock') }}
 
       - run: npm ci
         working-directory: editors/code
