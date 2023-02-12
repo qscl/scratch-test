@@ -5,7 +5,7 @@ all: ${VENV_PRE_COMMIT} extension qs
 
 .PHONY: qs
 qs: submodules
-	CARGO_NET_GIT_FETCH_WITH_CLI=true cargo build ${CARGO_FLAGS} --features cli
+	CARGO_NET_GIT_FETCH_WITH_CLI=true cargo build ${CARGO_FLAGS} --features cli lsp
 
 .PHONY: submodules
 submodules: sqlparser-rs/Cargo.toml
@@ -13,13 +13,10 @@ submodules: sqlparser-rs/Cargo.toml
 sqlparser-rs/Cargo.toml:
 	git submodule update --init --recursive
 
-.PHONY: extension lsp yarn-deps ts-bindings
+.PHONY: extension yarn-deps ts-bindings
 
-extension: lsp yarn-deps
+extension: qs yarn-deps
 	cd extension && yarn esbuild
-
-lsp: submodules
-	CARGO_NET_GIT_FETCH_WITH_CLI=true cargo build ${CARGO_FLAGS} --features lsp
 
 yarn-deps: ts-bindings
 	cd extension && yarn install
