@@ -117,11 +117,8 @@ jobs:
           restore-keys: |
             ${{ matrix.os }}-yarn-${{ hashFiles('./extension/yarn.lock', './extension/webview/yarn.lock', './extension/client/yarn.lock') }}
 
-      - name: Make qs
-        run: make qs
-
-      - name: Make yarn-deps
-        run: make yarn-deps
+      - name: Make
+        run: make all
 
       - uses: actions/cache/save@v3
         if: always()
