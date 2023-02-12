@@ -129,8 +129,6 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - uses: actions/cache/save@v3
         if: always()
@@ -140,8 +138,6 @@ jobs:
             extension/client/node_modules
             extension/webview/node_modules
           key: ${{ matrix.os }}-cargo-${{ hashFiles('**/yarn.lock') }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ matrix.os }}-cargo-${{ hashFiles('**/yarn.lock') }}
 
       - run: npm ci
         working-directory: editors/code
