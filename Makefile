@@ -5,7 +5,7 @@ all: ${VENV_PRE_COMMIT} extension qs
 
 .PHONY: qs
 qs: submodules
-	CARGO_NET_GIT_FETCH_WITH_CLI=true cargo build ${CARGO_FLAGS} --features cli
+	cargo build ${CARGO_FLAGS} --features cli
 
 .PHONY: submodules
 submodules: sqlparser-rs/Cargo.toml
@@ -18,7 +18,7 @@ extension: lsp-rust yarn-deps
 	cd extension && yarn esbuild
 
 lsp-rust: submodules
-	CARGO_NET_GIT_FETCH_WITH_CLI=true cargo build ${CARGO_FLAGS} --features lsp
+	cargo build ${CARGO_FLAGS} --features lsp
 
 yarn-deps: ts-bindings
 	cd extension && yarn install
@@ -29,7 +29,7 @@ ts-bindings:
 
 .PHONY: test lfs refresh-test-data
 test: lfs submodules
-	cd queryscript/src/ && CARGO_NET_GIT_FETCH_WITH_CLI=true cargo test ${CARGO_FLAGS} -- --nocapture
+	cd queryscript/src/ && cargo test ${CARGO_FLAGS} -- --nocapture
 
 lfs:
 	git lfs install && git lfs fetch
