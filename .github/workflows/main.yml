@@ -110,10 +110,10 @@ jobs:
             extension/node_modules
             extension/client/node_modules
             extension/webview/node_modules
-          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ matrix.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
-      - name: Dist
-        run: make
+      - name: Make
+        run: cargo build --release --features cli
 
       - uses: actions/cache/save@v3
         if: always()
@@ -133,7 +133,7 @@ jobs:
             extension/node_modules
             extension/client/node_modules
             extension/webview/node_modules
-          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ matrix.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
       - run: npm ci
         working-directory: editors/code
