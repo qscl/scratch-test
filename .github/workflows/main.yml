@@ -112,9 +112,9 @@ jobs:
             extension/node_modules
             extension/client/node_modules
             extension/webview/node_modules
-          key: ${{ matrix.os }}-yarn-${{ hashFiles('**/yarn.lock') }}-${{ github.run_id }}
+          key: ${{ matrix.os }}-yarn-${{ hashFiles('./extension/yarn.lock', './extension/webview/yarn.lock', './extension/client/yarn.lock') }}-${{ github.run_id }}
           restore-keys: |
-            ${{ matrix.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+            ${{ matrix.os }}-yarn-${{ hashFiles('./extension/yarn.lock', './extension/webview/yarn.lock', './extension/client/yarn.lock') }}
 
       - name: Make qs
         run: make qs
@@ -143,7 +143,7 @@ jobs:
             extension/node_modules
             extension/client/node_modules
             extension/webview/node_modules
-          key: ${{ matrix.os }}-yarn-${{ hashFiles('**/yarn.lock') }}-${{ github.run_id }}
+          key: ${{ matrix.os }}-yarn-${{ hashFiles('./extension/yarn.lock', './extension/webview/yarn.lock', './extension/client/yarn.lock') }}-${{ github.run_id }}
 
       - run: npm ci
         working-directory: editors/code
