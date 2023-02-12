@@ -1,12 +1,11 @@
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 .PHONY: all
-all: ${VENV_PRE_COMMIT} submodules cli lsp
-	@true
+all: ${VENV_PRE_COMMIT} extension qs submodules
 
-.PHONY: cli
-cli: ${VENV_PRE_COMMIT} submodules
-	cd queryscript && CARGO_NET_GIT_FETCH_WITH_CLI=true cargo build --features "cli"
+.PHONY: qs
+qs: submodules
+	CARGO_NET_GIT_FETCH_WITH_CLI=true cargo build ${CARGO_FLAGS} --features cli
 
 .PHONY: submodules
 submodules: sqlparser-rs/Cargo.toml
@@ -14,13 +13,12 @@ submodules: sqlparser-rs/Cargo.toml
 sqlparser-rs/Cargo.toml:
 	git submodule update --init --recursive
 
-.PHONY: lsp
-lsp: yarn-deps
+.PHONY: extension lsp-rust yarn-deps ts-bindings
+extension: lsp-rust yarn-deps
 	cd extension && yarn esbuild
 
-.PHONY: lsp-rust
-lsp-rust: ${VENV_PRE_COMMIT} submodules
-	cd queryscript && CARGO_NET_GIT_FETCH_WITH_CLI=true cargo build --features "lsp"
+lsp-rust: submodules
+	CARGO_NET_GIT_FETCH_WITH_CLI=true cargo build ${CARGO_FLAGS} --features lsp
 
 .PHONY: yarn-deps
 yarn-deps: ts-bindings
@@ -28,12 +26,12 @@ yarn-deps: ts-bindings
 
 .PHONY: ts-bindings
 ts-bindings:
-	cd queryscript/src && cargo test --features ts export_bindings
+	cd queryscript/src && cargo test ${CARGO_FLAGS} --features ts export_bindings
 
 
 .PHONY: test lfs refresh-test-data
 test: lfs submodules
-	cd queryscript/src/ && CARGO_NET_GIT_FETCH_WITH_CLI=true cargo test -- --nocapture
+	cd queryscript/src/ && CARGO_NET_GIT_FETCH_WITH_CLI=true cargo test ${CARGO_FLAGS} -- --nocapture
 
 lfs:
 	git lfs install && git lfs fetch
@@ -60,7 +58,7 @@ ${VENV_PRE_COMMIT}: ${VENV_PYTHON_PACKAGES}
 	bash -c 'source venv/bin/activate && pre-commit install'
 	@touch $@
 
-develop: ${VENV_PRE_COMMIT} lsp qs lfs
+develop: ${VENV_PRE_COMMIT} extension qs lfs
 	@echo "--\nRun "source env.sh" to enter development mode!"
 
 fixup:
