@@ -116,7 +116,7 @@ jobs:
         run: make qs
 
       - name: Make 2
-        run: make lsp
+        run: cargo build --release --features lsp
 
       - name: Make 3
         run: make yarn-deps
