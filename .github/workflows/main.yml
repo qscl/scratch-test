@@ -90,10 +90,14 @@ jobs:
 
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
+        # XXX Maybe remove this, but it's here so that while developing the workflow, we still get to cache Rust
+        if: always()
         with:
           key: ${{ github.job }}-${{ matrix.os }}  # Eg. "some_build-ubuntu-latest"
 
       - uses: actions/cache@v3
+        # XXX Maybe remove this, but it's here so that while developing the workflow, we still get to cache Rust
+        if: always()
         with:
           path: |
             ~/.cargo/bin/
