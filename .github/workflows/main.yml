@@ -102,9 +102,10 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ github.run_id }}
+          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-release-${{ github.run_id }}
           restore-keys: |
-            ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+            ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-release-
+            ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-
 
       - uses: actions/cache@v3
         with:
@@ -119,9 +120,6 @@ jobs:
       - name: Make qs
         run: make qs
 
-      - name: Make lsp
-        run: cargo build --release --features lsp
-
       - name: Make yarn-deps
         run: make yarn-deps
 
@@ -134,7 +132,7 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ github.run_id }}
+          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-release-${{ github.run_id }}
 
       - uses: actions/cache/save@v3
         if: always()
