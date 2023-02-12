@@ -113,7 +113,7 @@ jobs:
           key: ${{ matrix.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
       - name: Make
-        run: cargo build --release --features cli
+        run: CARGO_NET_GIT_FETCH_WITH_CLI=true cargo build --release --features cli
 
       - uses: actions/cache/save@v3
         if: always()
@@ -138,6 +138,7 @@ jobs:
       - run: npm ci
         working-directory: editors/code
 
+      # NOTE: We don't follow this convention just yet, but we might as well keep the code around once we support releases vs. nightly
       - name: Package Extension (release)
         if: github.ref == 'refs/heads/release'
         run: npx vsce package -o "../../dist/rust-analyzer-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
