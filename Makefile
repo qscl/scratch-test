@@ -13,15 +13,12 @@ submodules: sqlparser-rs/Cargo.toml
 sqlparser-rs/Cargo.toml:
 	git submodule update --init --recursive
 
-.PHONY: extension build-extension lsp-rust yarn-deps ts-bindings
+.PHONY: extension lsp yarn-deps ts-bindings
 
-extension: lsp-rust build-extension
-	cd extension && npx vsce package
-
-build-extension: yarn-deps
+extension: lsp yarn-deps
 	cd extension && yarn esbuild
 
-lsp-rust: submodules
+lsp: submodules
 	CARGO_NET_GIT_FETCH_WITH_CLI=true cargo build ${CARGO_FLAGS} --features lsp
 
 yarn-deps: ts-bindings
