@@ -112,13 +112,13 @@ jobs:
             extension/webview/node_modules
           key: ${{ matrix.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
-      - name: Make 1
+      - name: Make qs
         run: make qs
 
-      - name: Make 2
+      - name: Make lsp
         run: cargo build --release --features lsp
 
-      - name: Make 3
+      - name: Make yarn-deps
         run: make yarn-deps
 
       - uses: actions/cache/save@v3
