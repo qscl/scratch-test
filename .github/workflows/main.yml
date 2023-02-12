@@ -20,31 +20,31 @@ jobs:
     strategy:
       matrix:
         include:
-#          - os: windows-latest
-#            target: x86_64-pc-windows-msvc
-#            code-target: win32-x64
-#          - os: windows-latest
-#            target: i686-pc-windows-msvc
-#            code-target: win32-ia32
-#          - os: windows-latest
-#            target: aarch64-pc-windows-msvc
-#            code-target: win32-arm64
+          #          - os: windows-latest
+          #            target: x86_64-pc-windows-msvc
+          #            code-target: win32-x64
+          #          - os: windows-latest
+          #            target: i686-pc-windows-msvc
+          #            code-target: win32-ia32
+          #          - os: windows-latest
+          #            target: aarch64-pc-windows-msvc
+          #            code-target: win32-arm64
           - os: ubuntu-20.04
             target: x86_64-unknown-linux-gnu
             code-target: linux-x64
-#          - os: ubuntu-20.04
-#            target: aarch64-unknown-linux-gnu
-#            code-target: linux-arm64
-#            arch: aarch64
-#          - os: ubuntu-20.04
-#            target: arm-unknown-linux-gnueabihf
-#            code-target: linux-armhf
-#          - os: macos-11
-#            target: x86_64-apple-darwin
-#            code-target: darwin-x64
-#          - os: macos-11
-#            target: aarch64-apple-darwin
-#            code-target: darwin-arm64
+    #          - os: ubuntu-20.04
+    #            target: aarch64-unknown-linux-gnu
+    #            code-target: linux-arm64
+    #            arch: aarch64
+    #          - os: ubuntu-20.04
+    #            target: arm-unknown-linux-gnueabihf
+    #            code-target: linux-armhf
+    #          - os: macos-11
+    #            target: x86_64-apple-darwin
+    #            code-target: darwin-x64
+    #          - os: macos-11
+    #            target: aarch64-apple-darwin
+    #            code-target: darwin-arm64
 
     name: dist (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
@@ -92,7 +92,7 @@ jobs:
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ github.job }}-${{ matrix.os }}  # Eg. "some_build-ubuntu-latest"
+          key: ${{ github.job }}-${{ matrix.os }} # Eg. "some_build-ubuntu-latest"
 
       - uses: actions/cache@v3
         with:
@@ -102,7 +102,9 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - uses: actions/cache@v3
         with:
@@ -110,7 +112,9 @@ jobs:
             extension/node_modules
             extension/client/node_modules
             extension/webview/node_modules
-          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/yarn.lock') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ matrix.os }}-cargo-${{ hashFiles('**/yarn.lock') }}
 
       - name: Dist
         run: make
@@ -124,7 +128,9 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - uses: actions/cache/save@v3
         if: always()
@@ -133,7 +139,9 @@ jobs:
             extension/node_modules
             extension/client/node_modules
             extension/webview/node_modules
-          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/yarn.lock') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ matrix.os }}-cargo-${{ hashFiles('**/yarn.lock') }}
 
       - run: npm ci
         working-directory: editors/code
