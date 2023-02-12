@@ -118,7 +118,7 @@ jobs:
             ${{ matrix.os }}-yarn-${{ hashFiles('./extension/yarn.lock', './extension/webview/yarn.lock', './extension/client/yarn.lock') }}
 
       - name: Make
-        run: make all -j 3
+        run: make all
 
       - uses: actions/cache/save@v3
         if: always()
@@ -140,38 +140,24 @@ jobs:
             extension/webview/node_modules
           key: ${{ matrix.os }}-yarn-${{ hashFiles('./extension/yarn.lock', './extension/webview/yarn.lock', './extension/client/yarn.lock') }}-${{ github.run_id }}
 
-      - run: npm ci
-        working-directory: editors/code
+      - name: Run tests
+        run: make test
+
+      - name: Setup dist
+        run: |
+          mkdir -p dist
+          cp target/release/qs dist
 
       # NOTE: We don't follow this convention just yet, but we might as well keep the code around once we support releases vs. nightly
       - name: Package Extension (release)
         if: github.ref == 'refs/heads/release'
-        run: npx vsce package -o "../../dist/rust-analyzer-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
-        working-directory: editors/code
+        run: npx vsce package -o ../dist/"queryscript-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
+        working-directory: extension
 
       - name: Package Extension (nightly)
         if: github.ref != 'refs/heads/release'
-        run: npx vsce package -o "../../dist/rust-analyzer-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }} --pre-release
-        working-directory: editors/code
-
-      - if: matrix.target == 'x86_64-unknown-linux-gnu'
-        run: rm -rf editors/code/server
-
-      - if: matrix.target == 'x86_64-unknown-linux-gnu' && github.ref == 'refs/heads/release'
-        run: npx vsce package -o ../../dist/rust-analyzer-no-server.vsix
-        working-directory: editors/code
-
-      - if: matrix.target == 'x86_64-unknown-linux-gnu' && github.ref != 'refs/heads/release'
-        run: npx vsce package -o ../../dist/rust-analyzer-no-server.vsix --pre-release
-        working-directory: editors/code
-
-      - name: Run analysis-stats on rust-analyzer
-        if: matrix.target == 'x86_64-unknown-linux-gnu'
-        run: target/${{ matrix.target }}/release/rust-analyzer analysis-stats .
-
-      - name: Run analysis-stats on rust std library
-        if: matrix.target == 'x86_64-unknown-linux-gnu'
-        run: target/${{ matrix.target }}/release/rust-analyzer analysis-stats --with-deps $(rustc --print sysroot)/lib/rustlib/src/rust/library/std
+        run: npx vsce package -o ../dist/"queryscript-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }} --pre-release
+        working-directory: extension
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
