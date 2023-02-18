@@ -1,4 +1,6 @@
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+VENV_PRE_COMMIT := ${ROOT_DIR}/venv/.pre_commit
+
 
 .PHONY: all
 all: ${VENV_PRE_COMMIT} extension qs submodules
@@ -48,8 +50,6 @@ ${VENV_PYTHON_PACKAGES}: ${VENV_INITIALIZED} qsutils/setup.py
 	bash -c 'source venv/bin/activate && python -m pip install --upgrade pip setuptools'
 	bash -c 'source venv/bin/activate && python -m pip install -e ./qsutils[dev]'
 	@touch $@
-
-VENV_PRE_COMMIT := venv/.pre_commit
 
 ${VENV_PRE_COMMIT}: ${VENV_PYTHON_PACKAGES}
 	bash -c 'source venv/bin/activate && pre-commit install'
