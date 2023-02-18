@@ -170,13 +170,22 @@ jobs:
     runs-on: ubuntu-latest
     needs: ["dist"]
     steps:
+      - name: Install toolchain dependencies
+        run: |
+          apt-get update && apt-get install -y build-essential curl git
+          curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused -fsSL "https://sh.rustup.rs" | sh -s -- --profile minimal --default-toolchain none -y
+          echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> $GITHUB_PATH
+      - name: Install Rust toolchain
+        run: |
+          rustup update --no-self-update stable
       - name: Install Nodejs
         uses: actions/setup-node@v3
         with:
           node-version: 16
 
-      - run: echo "TAG=$(date --iso -u)" >> $GITHUB_ENV
+      - run: echo "TAG=$(cargo metadata --format-version 1 --no-deps | jq -r '.packages[0].version')" >> $GITHUB_ENV
         if: github.ref == 'refs/heads/release'
+        working-directory: ./queryscript
       - run: echo "TAG=nightly" >> $GITHUB_ENV
         if: github.ref != 'refs/heads/release'
       - run: 'echo "TAG: $TAG"'
@@ -189,76 +198,73 @@ jobs:
       - run: echo "HEAD_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
       - run: 'echo "HEAD_SHA: $HEAD_SHA"'
 
-      - uses: actions/download-artifact@v1
-        with:
-          name: dist-aarch64-apple-darwin
-          path: dist
-      - uses: actions/download-artifact@v1
-        with:
-          name: dist-x86_64-apple-darwin
-          path: dist
+#      - uses: actions/download-artifact@v1
+#        with:
+#          name: dist-aarch64-apple-darwin
+#          path: dist
+#      - uses: actions/download-artifact@v1
+#        with:
+#          name: dist-x86_64-apple-darwin
+#          path: dist
       - uses: actions/download-artifact@v1
         with:
           name: dist-x86_64-unknown-linux-gnu
           path: dist
-      - uses: actions/download-artifact@v1
-        with:
-          name: dist-x86_64-unknown-linux-musl
-          path: dist
-      - uses: actions/download-artifact@v1
-        with:
-          name: dist-aarch64-unknown-linux-gnu
-          path: dist
-      - uses: actions/download-artifact@v1
-        with:
-          name: dist-arm-unknown-linux-gnueabihf
-          path: dist
-      - uses: actions/download-artifact@v1
-        with:
-          name: dist-x86_64-pc-windows-msvc
-          path: dist
-      - uses: actions/download-artifact@v1
-        with:
-          name: dist-i686-pc-windows-msvc
-          path: dist
-      - uses: actions/download-artifact@v1
-        with:
-          name: dist-aarch64-pc-windows-msvc
-          path: dist
+#      - uses: actions/download-artifact@v1
+#        with:
+#          name: dist-x86_64-unknown-linux-musl
+#          path: dist
+#      - uses: actions/download-artifact@v1
+#        with:
+#          name: dist-aarch64-unknown-linux-gnu
+#          path: dist
+#      - uses: actions/download-artifact@v1
+#        with:
+#          name: dist-arm-unknown-linux-gnueabihf
+#          path: dist
+#      - uses: actions/download-artifact@v1
+#        with:
+#          name: dist-x86_64-pc-windows-msvc
+#          path: dist
+#      - uses: actions/download-artifact@v1
+#        with:
+#          name: dist-i686-pc-windows-msvc
+#          path: dist
+#      - uses: actions/download-artifact@v1
+#        with:
+#          name: dist-aarch64-pc-windows-msvc
+#          path: dist
       - run: ls -al ./dist
 
-      - name: Publish Release
-        uses: ./.github/actions/github-release
-        with:
-          files: "dist/*"
-          name: ${{ env.TAG }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Publish Release
+#        uses: ./.github/actions/github-release
+#        with:
+#          files: "dist/*"
+#          name: ${{ env.TAG }}
+#          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: rm dist/rust-analyzer-no-server.vsix
-
-      - run: npm ci
-        working-directory: ./editors/code
+#      - run: rm dist/rust-analyzer-no-server.vsix
 
       - name: Publish Extension (Code Marketplace, release)
-        if: github.ref == 'refs/heads/release' && (github.repository == 'rust-analyzer/rust-analyzer' || github.repository == 'rust-lang/rust-analyzer')
-        working-directory: ./editors/code
+        if: github.ref == 'refs/heads/release' && github.repository == 'qscl/scratch-test'
+        working-directory: ./extension
         # token from https://dev.azure.com/rust-analyzer/
-        run: npx vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath ../../dist/rust-analyzer-*.vsix
+        run: npx vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath ../dist/rust-analyzer-*.vsix
 
-      - name: Publish Extension (OpenVSX, release)
-        if: github.ref == 'refs/heads/release' && (github.repository == 'rust-analyzer/rust-analyzer' || github.repository == 'rust-lang/rust-analyzer')
-        working-directory: ./editors/code
-        run: npx ovsx publish --pat ${{ secrets.OPENVSX_TOKEN }} --packagePath ../../dist/rust-analyzer-*.vsix
-        timeout-minutes: 2
+#      - name: Publish Extension (OpenVSX, release)
+#        if: github.ref == 'refs/heads/release' && (github.repository == 'rust-analyzer/rust-analyzer' || github.repository == 'rust-lang/rust-analyzer')
+#        working-directory: ./editors/code
+#        run: npx ovsx publish --pat ${{ secrets.OPENVSX_TOKEN }} --packagePath ../../dist/rust-analyzer-*.vsix
+#        timeout-minutes: 2
 
       - name: Publish Extension (Code Marketplace, nightly)
-        if: github.ref != 'refs/heads/release' && (github.repository == 'rust-analyzer/rust-analyzer' || github.repository == 'rust-lang/rust-analyzer')
-        working-directory: ./editors/code
-        run: npx vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath ../../dist/rust-analyzer-*.vsix
+        if: github.ref == 'refs/heads/release' && github.repository == 'qscl/scratch-test'
+        working-directory: ./extension
+        run: npx vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath ../dist/rust-analyzer-*.vsix
 
-      - name: Publish Extension (OpenVSX, nightly)
-        if: github.ref != 'refs/heads/release' && (github.repository == 'rust-analyzer/rust-analyzer' || github.repository == 'rust-lang/rust-analyzer')
-        working-directory: ./editors/code
-        run: npx ovsx publish --pat ${{ secrets.OPENVSX_TOKEN }} --packagePath ../../dist/rust-analyzer-*.vsix
-        timeout-minutes: 2
-
+#      - name: Publish Extension (OpenVSX, nightly)
+#        if: github.ref != 'refs/heads/release' && (github.repository == 'rust-analyzer/rust-analyzer' || github.repository == 'rust-lang/rust-analyzer')
+#        working-directory: ./editors/code
+#        run: npx ovsx publish --pat ${{ secrets.OPENVSX_TOKEN }} --packagePath ../../dist/rust-analyzer-*.vsix
+#        timeout-minutes: 2
+#
