@@ -1,7 +1,6 @@
 name: Release
 on:
   workflow_dispatch:
-  push:
 
 # Inspired by https://github.com/rust-lang/rust-analyzer/blob/master/.github/workflows/release.yaml
 env:
