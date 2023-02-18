@@ -169,12 +169,18 @@ jobs:
 
       - name: Package Extension (release)
         if: startsWith(github.ref, 'refs/tags/')
-        run: npx vsce package -o ../dist/"queryscript-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
+        run: |
+          source ../venv/bin/activate
+          python -m qsutils.extversion --run-id ${{ github.run_number }}
+          npx vsce package -o ../dist/"queryscript-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
         working-directory: extension
 
       - name: Package Extension (nightly)
         if: "!startsWith(github.ref, 'refs/tags/')"
-        run: npx vsce package -o ../dist/"queryscript-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }} --pre-release
+        run: |
+          source ../venv/bin/activate
+          python -m qsutils.extversion --run-id ${{ github.run_number }} --pre-release
+          npx vsce package -o ../dist/"queryscript-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }} --pre-release
         working-directory: extension
 
       - name: Upload artifacts
