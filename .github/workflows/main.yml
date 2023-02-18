@@ -120,6 +120,7 @@ jobs:
 
       - name: Make
         run: make all
+        timeout-minutes: 40
 
       - uses: actions/cache/save@v3
         if: always()
