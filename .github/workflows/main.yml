@@ -149,6 +149,7 @@ jobs:
         run: |
           mkdir -p dist
           cp target/release/qs dist
+          gzip -S "-${{ matrix.code-target }}.gz" dist/qs
 
       - name: Package Extension (release)
         if: startsWith(github.ref, 'refs/tags/')
