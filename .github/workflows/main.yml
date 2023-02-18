@@ -87,7 +87,7 @@ jobs:
         with:
           fetch-depth: ${{ env.FETCH_DEPTH }}
           submodules: true
-          lfs: true
+          # lfs: true # XXX Disabled for tests
 
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
