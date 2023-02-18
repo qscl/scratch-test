@@ -1,6 +1,11 @@
 name: Release
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+  schedule:
+    - cron: "0 0 * * *" # midnight UTC
 
 # Inspired by https://github.com/rust-lang/rust-analyzer/blob/master/.github/workflows/release.yaml
 env:
@@ -19,6 +24,7 @@ jobs:
     strategy:
       matrix:
         include:
+          # TODO: Support windows
           #          - os: windows-latest
           #            target: x86_64-pc-windows-msvc
           #            code-target: win32-x64
@@ -31,19 +37,19 @@ jobs:
           - os: ubuntu-20.04
             target: x86_64-unknown-linux-gnu
             code-target: linux-x64
-    #          - os: ubuntu-20.04
-    #            target: aarch64-unknown-linux-gnu
-    #            code-target: linux-arm64
-    #            arch: aarch64
-    #          - os: ubuntu-20.04
-    #            target: arm-unknown-linux-gnueabihf
-    #            code-target: linux-armhf
-    #          - os: macos-11
-    #            target: x86_64-apple-darwin
-    #            code-target: darwin-x64
-    #          - os: macos-11
-    #            target: aarch64-apple-darwin
-    #            code-target: darwin-arm64
+          - os: ubuntu-20.04
+            target: aarch64-unknown-linux-gnu
+            code-target: linux-arm64
+            arch: aarch64
+          - os: ubuntu-20.04
+            target: arm-unknown-linux-gnueabihf
+            code-target: linux-armhf
+          - os: macos-11
+            target: x86_64-apple-darwin
+            code-target: darwin-x64
+          - os: macos-11
+            target: aarch64-apple-darwin
+            code-target: darwin-arm64
 
     name: dist (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
@@ -87,7 +93,7 @@ jobs:
         with:
           fetch-depth: ${{ env.FETCH_DEPTH }}
           submodules: true
-        # lfs: true # XXX Disabled while tests are off
+          lfs: true
 
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
@@ -129,37 +135,37 @@ jobs:
         run: make all
         timeout-minutes: 40
 
-      - uses: actions/cache/save@v3
-        if: always()
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-release-${{ github.run_id }}
+      #      # This code allows you to save artifacts even if the job fails. It's useful while debugging!
+      #      - uses: actions/cache/save@v3
+      #        if: always()
+      #        with:
+      #          path: |
+      #            ~/.cargo/bin/
+      #            ~/.cargo/registry/index/
+      #            ~/.cargo/registry/cache/
+      #            ~/.cargo/git/db/
+      #            target/
+      #          key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-release-${{ github.run_id }}
+      #
+      #      - uses: actions/cache/save@v3
+      #        if: always()
+      #        with:
+      #          path: |
+      #            extension/node_modules
+      #            extension/client/node_modules
+      #            extension/webview/node_modules
+      #          key: ${{ matrix.target }}-yarn-${{ hashFiles('./extension/yarn.lock', './extension/webview/yarn.lock', './extension/client/yarn.lock') }}-${{ github.run_id }}
+      #
+      #      - uses: actions/cache/save@v3
+      #        if: always()
+      #        with:
+      #          path: |
+      #            venv
+      #          key:
+      #            ${{ matrix.target }}-venv-${{ hashFiles('./qsutils/setup.py') }}-${{ github.run_id }}
 
-      - uses: actions/cache/save@v3
-        if: always()
-        with:
-          path: |
-            extension/node_modules
-            extension/client/node_modules
-            extension/webview/node_modules
-          key: ${{ matrix.target }}-yarn-${{ hashFiles('./extension/yarn.lock', './extension/webview/yarn.lock', './extension/client/yarn.lock') }}-${{ github.run_id }}
-
-      - uses: actions/cache/save@v3
-        if: always()
-        with:
-          path: |
-            venv
-          key:
-            ${{ matrix.target }}-venv-${{ hashFiles('./qsutils/setup.py') }}-${{ github.run_id }}
-
-            # XXX Re-enable
-      #      - name: Run tests
-      #        run: make test
+      - name: Run tests
+        run: make test
 
       - name: Setup dist
         run: |
@@ -221,30 +227,30 @@ jobs:
       - run: echo "HEAD_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
       - run: 'echo "HEAD_SHA: $HEAD_SHA"'
 
-      #      - uses: actions/download-artifact@v1
-      #        with:
-      #          name: dist-aarch64-apple-darwin
-      #          path: dist
-      #      - uses: actions/download-artifact@v1
-      #        with:
-      #          name: dist-x86_64-apple-darwin
-      #          path: dist
+      - uses: actions/download-artifact@v1
+        with:
+          name: dist-aarch64-apple-darwin
+          path: dist
+      - uses: actions/download-artifact@v1
+        with:
+          name: dist-x86_64-apple-darwin
+          path: dist
       - uses: actions/download-artifact@v1
         with:
           name: dist-x86_64-unknown-linux-gnu
           path: dist
-      #      - uses: actions/download-artifact@v1
-      #        with:
-      #          name: dist-x86_64-unknown-linux-musl
-      #          path: dist
-      #      - uses: actions/download-artifact@v1
-      #        with:
-      #          name: dist-aarch64-unknown-linux-gnu
-      #          path: dist
-      #      - uses: actions/download-artifact@v1
-      #        with:
-      #          name: dist-arm-unknown-linux-gnueabihf
-      #          path: dist
+      - uses: actions/download-artifact@v1
+        with:
+          name: dist-x86_64-unknown-linux-musl
+          path: dist
+      - uses: actions/download-artifact@v1
+        with:
+          name: dist-aarch64-unknown-linux-gnu
+          path: dist
+      - uses: actions/download-artifact@v1
+        with:
+          name: dist-arm-unknown-linux-gnueabihf
+          path: dist
       #      - uses: actions/download-artifact@v1
       #        with:
       #          name: dist-x86_64-pc-windows-msvc
@@ -268,26 +274,16 @@ jobs:
 
       - name: Install vsce
         run: npm install -g @vscode/vsce
-        working-directory: ./extension
+        working-directory:
+          ./extension
 
-      - name: Publish Extension (Code Marketplace, release)
-        if: startsWith(github.ref, 'refs/tags/') && github.repository == 'qscl/scratch-test'
-        working-directory: ./extension
-        run: npx vsce publish --skip-duplicate --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath ../dist/queryscript-*.vsix --dry-run
-
-      #      - name: Publish Extension (OpenVSX, release)
-      #        if: github.ref == 'refs/heads/release' && (github.repository == 'rust-analyzer/rust-analyzer' || github.repository == 'rust-lang/rust-analyzer')
-      #        working-directory: ./editors/code
-      #        run: npx ovsx publish --pat ${{ secrets.OPENVSX_TOKEN }} --packagePath ../../dist/rust-analyzer-*.vsix
-      #        timeout-minutes: 2
-
-      - name: Publish Extension (Code Marketplace, nightly)
-        if: "!startsWith(github.ref, 'refs/tags/') && github.repository == 'qscl/scratch-test'"
-        working-directory: ./extension
-        run: npx vsce publish --skip-duplicate --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath ../dist/queryscript-*.vsix --dry-run
-#      - name: Publish Extension (OpenVSX, nightly)
-#        if: github.ref != 'refs/heads/release' && (github.repository == 'rust-analyzer/rust-analyzer' || github.repository == 'rust-lang/rust-analyzer')
-#        working-directory: ./editors/code
-#        run: npx ovsx publish --pat ${{ secrets.OPENVSX_TOKEN }} --packagePath ../../dist/rust-analyzer-*.vsix
-#        timeout-minutes: 2
+          # TODO: This is disabled while we are still testing
+#      - name: Publish Extension (Code Marketplace, release)
+#        if: startsWith(github.ref, 'refs/tags/') && github.repository == 'qscl/scratch-test'
+#        working-directory: ./extension
+#        run: npx vsce publish --skip-duplicate --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath ../dist/queryscript-*.vsix
 #
+#      - name: Publish Extension (Code Marketplace, nightly)
+#        if: "!startsWith(github.ref, 'refs/tags/') && github.repository == 'qscl/scratch-test'"
+#        working-directory: ./extension
+#        run: npx vsce publish --skip-duplicate --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath ../dist/queryscript-*.vsix
