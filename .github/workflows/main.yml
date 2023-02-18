@@ -184,17 +184,17 @@ jobs:
         with:
           node-version: 16
 
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: ${{ env.FETCH_DEPTH }}
+
       - run: echo "TAG=$(cargo metadata --format-version 1 --no-deps | jq -r '.packages[0].version')" >> $GITHUB_ENV
         if: github.ref == 'refs/heads/release'
         working-directory: ./queryscript
       - run: echo "TAG=nightly" >> $GITHUB_ENV
         if: github.ref != 'refs/heads/release'
       - run: 'echo "TAG: $TAG"'
-
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: ${{ env.FETCH_DEPTH }}
 
       - run: echo "HEAD_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
       - run: 'echo "HEAD_SHA: $HEAD_SHA"'
