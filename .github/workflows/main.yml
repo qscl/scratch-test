@@ -31,19 +31,19 @@ jobs:
           - os: ubuntu-20.04
             target: x86_64-unknown-linux-gnu
             code-target: linux-x64
-          - os: ubuntu-20.04
-            target: aarch64-unknown-linux-gnu
-            code-target: linux-arm64
-            arch: aarch64
-          - os: ubuntu-20.04
-            target: arm-unknown-linux-gnueabihf
-            code-target: linux-armhf
-          - os: macos-11
-            target: x86_64-apple-darwin
-            code-target: darwin-x64
-          - os: macos-11
-            target: aarch64-apple-darwin
-            code-target: darwin-arm64
+#          - os: ubuntu-20.04
+#            target: aarch64-unknown-linux-gnu
+#            code-target: linux-arm64
+#            arch: aarch64
+#          - os: ubuntu-20.04
+#            target: arm-unknown-linux-gnueabihf
+#            code-target: linux-armhf
+#          - os: macos-11
+#            target: x86_64-apple-darwin
+#            code-target: darwin-x64
+#          - os: macos-11
+#            target: aarch64-apple-darwin
+#            code-target: darwin-arm64
 
     name: dist (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
@@ -87,7 +87,7 @@ jobs:
         with:
           fetch-depth: ${{ env.FETCH_DEPTH }}
           submodules: true
-          # lfs: true # XXX Disabled for tests
+        # lfs: true # XXX Disabled while tests are off
 
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
@@ -150,7 +150,6 @@ jobs:
           mkdir -p dist
           cp target/release/qs dist
 
-      # NOTE: We don't follow this convention just yet, but we might as well keep the code around once we support releases vs. nightly
       - name: Package Extension (release)
         if: startsWith(github.ref, 'refs/tags/')
         run: npx vsce package -o ../dist/"queryscript-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
@@ -188,6 +187,16 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: ${{ env.FETCH_DEPTH }}
+
+      - run: echo "TAG=$(git describe --tags --always)" >> $GITHUB_ENV
+        if: startsWith(github.ref, 'refs/tags/')
+        working-directory: ./queryscript
+      - run: echo "TAG=nightly" >> $GITHUB_ENV
+        if: "!startsWith(github.ref, 'refs/tags/')"
+      - run: 'echo "TAG: $TAG"'
+
+      - run: echo "HEAD_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+      - run: 'echo "HEAD_SHA: $HEAD_SHA"'
 
 #      - uses: actions/download-artifact@v1
 #        with:
@@ -227,25 +236,16 @@ jobs:
 #          path: dist
       - run: ls -al ./dist
 
-#      - name: Publish Release
-#        uses: ./.github/actions/github-release
-#        with:
-#          files: "dist/*"
-#          name: ${{ env.TAG }}
-#          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Publish Release
+        uses: ./.github/actions/github-release
         with:
           files: "dist/*"
-
+          name: ${{ env.TAG }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install vsce
         run: npm install -g @vscode/vsce
         working-directory: ./extension
-
-#      - run: rm dist/rust-analyzer-no-server.vsix
 
       - name: Publish Extension (Code Marketplace, release)
         if: startsWith(github.ref, 'refs/tags/') && github.repository == 'qscl/scratch-test'
