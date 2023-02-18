@@ -93,7 +93,7 @@ jobs:
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ github.job }}-${{ matrix.os }}  # Eg. "some_build-ubuntu-latest"
+          key: ${{ github.job }}-${{ matrix.target }}  # Eg. "some_build-ubuntu-latest"
 
       - uses: actions/cache@v3
         with:
@@ -103,10 +103,10 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-release-${{ github.run_id }}
+          key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-release-${{ github.run_id }}
           restore-keys: |
-            ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-release-
-            ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-
+            ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-release-
+            ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-
 
       - uses: actions/cache@v3
         with:
@@ -114,9 +114,9 @@ jobs:
             extension/node_modules
             extension/client/node_modules
             extension/webview/node_modules
-          key: ${{ matrix.os }}-yarn-${{ hashFiles('./extension/yarn.lock', './extension/webview/yarn.lock', './extension/client/yarn.lock') }}-${{ github.run_id }}
+          key: ${{ matrix.target }}-yarn-${{ hashFiles('./extension/yarn.lock', './extension/webview/yarn.lock', './extension/client/yarn.lock') }}-${{ github.run_id }}
           restore-keys: |
-            ${{ matrix.os }}-yarn-${{ hashFiles('./extension/yarn.lock', './extension/webview/yarn.lock', './extension/client/yarn.lock') }}
+            ${{ matrix.target }}-yarn-${{ hashFiles('./extension/yarn.lock', './extension/webview/yarn.lock', './extension/client/yarn.lock') }}
 
       - name: Make
         run: make all
@@ -130,7 +130,7 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-release-${{ github.run_id }}
+          key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-release-${{ github.run_id }}
 
       - uses: actions/cache/save@v3
         if: always()
@@ -139,7 +139,7 @@ jobs:
             extension/node_modules
             extension/client/node_modules
             extension/webview/node_modules
-          key: ${{ matrix.os }}-yarn-${{ hashFiles('./extension/yarn.lock', './extension/webview/yarn.lock', './extension/client/yarn.lock') }}-${{ github.run_id }}
+          key: ${{ matrix.target }}-yarn-${{ hashFiles('./extension/yarn.lock', './extension/webview/yarn.lock', './extension/client/yarn.lock') }}-${{ github.run_id }}
 
             # XXX Re-enable
 #      - name: Run tests
