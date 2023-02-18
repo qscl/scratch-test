@@ -238,16 +238,16 @@ jobs:
 #          path: dist
       - run: ls -al ./dist
 
+      - name: Publish Release
+        uses: ./.github/actions/github-release
+        with:
+          files: "dist/*"
+          name: ${{ env.TAG }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Install vsce
         run: npm install -g @vscode/vsce
         working-directory: ./extension
-
-#      - name: Publish Release
-#        uses: ./.github/actions/github-release
-#        with:
-#          files: "dist/*"
-#          name: ${{ env.TAG }}
-#          token: ${{ secrets.GITHUB_TOKEN }}
 
 #      - run: rm dist/rust-analyzer-no-server.vsix
 
