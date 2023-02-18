@@ -156,7 +156,7 @@ jobs:
         working-directory: extension
 
       - name: Package Extension (nightly)
-        if: github.ref != 'refs/heads/release'
+        if: "!startsWith(github.ref, 'refs/tags/')"
         run: npx vsce package -o ../dist/"queryscript-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }} --pre-release
         working-directory: extension
 
@@ -247,7 +247,7 @@ jobs:
 #      - run: rm dist/rust-analyzer-no-server.vsix
 
       - name: Publish Extension (Code Marketplace, release)
-        if: github.ref == 'refs/heads/release' && github.repository == 'qscl/scratch-test'
+        if: startsWith(github.ref, 'refs/tags/') && github.repository == 'qscl/scratch-test'
         working-directory: ./extension
         run: npx vsce publish --skip-duplicate --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath ../dist/queryscript-*.vsix
 
@@ -258,7 +258,7 @@ jobs:
 #        timeout-minutes: 2
 
       - name: Publish Extension (Code Marketplace, nightly)
-        if: github.ref != 'refs/heads/release' && github.repository == 'qscl/scratch-test'
+        if: "!startsWith(github.ref, 'refs/tags/')" && github.repository == 'qscl/scratch-test'
         working-directory: ./extension
         run: npx vsce publish --skip-duplicate --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath ../dist/queryscript-*.vsix
 
